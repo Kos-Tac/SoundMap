@@ -6,26 +6,32 @@ public class AudioPlayer : MonoBehaviour
 {
 
     private AudioSource audioSource;
+    [SerializeField]
+    private float audioDuration;
     //Play the music
     public bool m_Play;
     //Detect when you use the toggle, ensures music isn’t played multiple times
     public bool m_ToggleChange;
 
-    void Start()
+    private void Awake()
     {
         //Fetch the AudioSource from the GameObject
         audioSource = GetComponent<AudioSource>();
         //Ensure the toggle is set to true for the music to play at start-up
+        audioDuration = audioSource.clip.length;
         m_Play = false;
     }
 
     void Update()
     {
+
         //Check to see if you just set the toggle to positive
         if (m_Play == true && m_ToggleChange == true)
         {
             //Play the audio you attach to the AudioSource component
             audioSource.Play();
+            FindObjectOfType<MapGenerator>().initializeSoundMap();
+            FindObjectOfType<MapGenerator>().startGeneration();
             //Ensure audio doesn’t play more than once
             m_ToggleChange = false;
         }
@@ -34,6 +40,7 @@ public class AudioPlayer : MonoBehaviour
         {
             //Stop the audio
             audioSource.Stop();
+            FindObjectOfType<MapGenerator>().stopGeneration();
             //Ensure audio doesn’t play more than once
             m_ToggleChange = false;
         }
@@ -50,5 +57,10 @@ public class AudioPlayer : MonoBehaviour
             //Change to true to show that there was just a change in the toggle state
             m_ToggleChange = true;
         }
+    }
+
+    public float getAudioDuration()
+    {
+        return audioDuration;
     }
 }
