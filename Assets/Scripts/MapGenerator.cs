@@ -26,10 +26,11 @@ public class MapGenerator : MonoBehaviour
 
     public void FixedUpdate()
     {
-        System.Console.WriteLine("lapata");
+
         if (mapHungry)
         {
-            int currentYLine = currentStep % mapWidth;
+            int currentYLine = (currentStep / mapWidth) * mapIntervals;
+            Debug.Log(currentYLine);
             float power = audioAnalyser.rmsValue * 4;
             //Comparing currentStep to max possible iterations of our map
             //to avoid getting out of range in case of an Euclidian divide problem
@@ -38,15 +39,18 @@ public class MapGenerator : MonoBehaviour
                 feedSoundMap(currentStep, currentYLine + mapIntervals / 2, mapHeight / mapIntervals / 2, power);
             }
             currentStep += 1;
+            if (currentStep >= soundSteps)
+                stopGeneration();
         }
     }
 
 
 
-    public void initializeSoundMap()//float[,] soundMap)
+    public void initializeSoundMap()//
     {
         soundSteps = audioAnalyser.audioPlayer.getAudioDuration() / Time.fixedDeltaTime;
-        int verticalMaxSteps = Convert.ToInt32(soundSteps % mapWidth);
+        int verticalMaxSteps = Convert.ToInt32(soundSteps / mapWidth);
+        Debug.Log(verticalMaxSteps);
         mapIntervals = GCD(verticalMaxSteps, mapHeight) - 1;
         currentStep = 0;
         texture = new Texture2D(mapWidth, mapHeight);
@@ -68,9 +72,12 @@ public class MapGenerator : MonoBehaviour
 
     public void feedSoundMap(int coordX, int lineY, int interval, float mapHeight)
     {
+        Debug.Log(coordX);
         for (int y = lineY - interval; y < lineY + interval; y++)
         {
-            colourMap[interval * mapWidth + coordX] = Color.Lerp(Color.white, Color.black, mapHeight - Mathf.Abs(lineY - y)*0.1f );
+            if (y>=0)
+                colourMap[y * mapWidth + coordX] = Color.Lerp(Color.white, Color.black, mapHeight - Mathf.Abs(lineY - y)*0.15f );
+            
         }
         texture.SetPixels(colourMap);
         texture.Apply();
