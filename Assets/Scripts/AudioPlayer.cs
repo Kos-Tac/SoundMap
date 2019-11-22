@@ -30,8 +30,8 @@ public class AudioPlayer : MonoBehaviour
         {
             //Play the audio you attach to the AudioSource component
             audioSource.Play();
-            FindObjectOfType<MapGenerator>().initializeSoundMap();
-            FindObjectOfType<MapGenerator>().startGeneration();
+            FindObjectOfType<MapGenerator>().InitializeSoundMap();
+            FindObjectOfType<MapGenerator>().StartGeneration();
             //Ensure audio doesn’t play more than once
             m_ToggleChange = false;
         }
@@ -40,7 +40,7 @@ public class AudioPlayer : MonoBehaviour
         {
             //Stop the audio
             audioSource.Stop();
-            FindObjectOfType<MapGenerator>().stopGeneration();
+            FindObjectOfType<MapGenerator>().StopGeneration();
             //Ensure audio doesn’t play more than once
             m_ToggleChange = false;
         }

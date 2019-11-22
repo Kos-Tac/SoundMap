@@ -551,8 +551,25 @@ MonoBehaviour:
   mapWidth: 100
   mapHeight: 100
   textureRender: {fileID: 1101247543}
+  regions:
+  - name: ocean
+    height: 0
+    colour: {r: 0.26312745, g: 0.43889752, b: 0.6886792, a: 0}
+  - name: sand
+    height: 0.085
+    colour: {r: 0.8396226, g: 0.73272747, b: 0.3920879, a: 0}
+  - name: land
+    height: 0.5
+    colour: {r: 0.19824672, g: 0.5188679, b: 0.19824672, a: 0}
+  - name: mountain
+    height: 0.8
+    colour: {r: 0.5566038, g: 0.38888973, b: 0.3281862, a: 0}
+  - name: heights
+    height: 10
+    colour: {r: 0.735849, g: 0.735849, b: 0.735849, a: 0}
   audioAnalyser: {fileID: 935675137}
   mapHungry: 0
+  drawMode: 0
 --- !u!23 &1101247543
 MeshRenderer:
   m_ObjectHideFlags: 0

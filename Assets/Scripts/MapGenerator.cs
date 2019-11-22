@@ -9,6 +9,7 @@ public class MapGenerator : MonoBehaviour
     public int mapHeight;
     public Renderer textureRender;
     private Color[] colourMap;
+    public TerrainType[] regions;
     Texture2D texture;
     float soundSteps;
     int currentStep;
@@ -19,6 +20,9 @@ public class MapGenerator : MonoBehaviour
 
     public bool mapHungry;
 
+    public enum DrawMode { LinearSoundMap, CircularSoundMap };
+    public DrawMode drawMode;
+
     public void Start()
     {  
         mapHungry = false;
@@ -26,7 +30,14 @@ public class MapGenerator : MonoBehaviour
 
     public void FixedUpdate()
     {
+        if (drawMode == DrawMode.LinearSoundMap)
+            LinearGeneration();
 
+    }
+
+
+    private void LinearGeneration()
+    {
         if (mapHungry)
         {
             int currentYLine = (currentStep / mapWidth) * mapIntervals;
@@ -36,17 +47,16 @@ public class MapGenerator : MonoBehaviour
             //to avoid getting out of range in case of an Euclidian divide problem
             if (currentStep < mapWidth * mapIntervals)
             {
-                feedSoundMap(currentStep, currentYLine + mapIntervals / 2, mapHeight / mapIntervals / 2, power);
+                FeedSoundMap(currentStep, currentYLine + mapIntervals / 2, mapHeight / mapIntervals / 2, power);
             }
             currentStep += 1;
             if (currentStep >= soundSteps)
-                stopGeneration();
+                StopGeneration();
         }
     }
 
 
-
-    public void initializeSoundMap()//
+    public void InitializeSoundMap()//
     {
         soundSteps = audioAnalyser.audioPlayer.getAudioDuration() / Time.fixedDeltaTime;
         int verticalMaxSteps = Convert.ToInt32(soundSteps / mapWidth);
@@ -61,7 +71,7 @@ public class MapGenerator : MonoBehaviour
         {
             for (int x = 0; x < mapWidth; x++)
             {
-                colourMap[y * mapWidth + x] = Color.white;
+                colourMap[y * mapWidth + x] = regions[0].colour;
             }
         }
         texture.SetPixels(colourMap);
@@ -70,28 +80,41 @@ public class MapGenerator : MonoBehaviour
         textureRender.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
     }
 
-    public void feedSoundMap(int coordX, int lineY, int interval, float mapHeight)
+    public void FeedSoundMap(int coordX, int lineY, int interval, float mapHeight)
     {
         Debug.Log(coordX);
         for (int y = lineY - interval; y < lineY + interval; y++)
         {
-            if (y>=0)
-                colourMap[y * mapWidth + coordX] = Color.Lerp(Color.white, Color.black, mapHeight - Mathf.Abs(lineY - y)*0.15f );
+            if (y >= 0)
+            {
+                float currentHeight = mapHeight - Mathf.Abs(lineY - y) * 0.15f;
+                for (int i = 0; i < regions.Length; i++)
+                {
+                    if (currentHeight <= regions[i].height)
+                    {
+                        colourMap[y * mapWidth + coordX] = regions[i].colour;
+                        break;
+                    }
+                }
+            }
             
         }
         texture.SetPixels(colourMap);
         texture.Apply();
     }
 
-    public void startGeneration()
+    public void StartGeneration()
     {
         mapHungry = true;
     }
 
-    public void stopGeneration()
+    public void StopGeneration()
     {
         mapHungry = false;
     }
+
+
+    /*-----------------------Utilitary functions---------------------------*/
 
     private static int GCD(int a, int b)
     {
@@ -105,5 +128,15 @@ public class MapGenerator : MonoBehaviour
 
         return a == 0 ? b : a;
     }
+
+
+    [System.Serializable]
+    public struct TerrainType
+    {
+        public string name;
+        public float height;
+        public Color colour;
+    }
+
 
 }
