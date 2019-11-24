@@ -8,8 +8,12 @@ public class MapGenerator : MonoBehaviour
     public int mapWidth;
     public int mapHeight;
     public Renderer textureRender;
+    private Mesh mesh;
+    //public MeshRenderer meshRenderer;
+
     private Color[] colourMap;
     public TerrainType[] regions;
+    public float heightMultiplicator;
     Texture2D texture;
     float soundSteps;
     int currentStep;
@@ -20,7 +24,7 @@ public class MapGenerator : MonoBehaviour
 
     public bool mapHungry;
 
-    public enum DrawMode { LinearSoundMap, CircularSoundMap };
+    public enum DrawMode { LinearSoundTex, LinearSoundMesh };//, CircularSoundTex, CircularSoundMesh }; These are next in line
     public DrawMode drawMode;
 
     public void Start()
@@ -30,9 +34,8 @@ public class MapGenerator : MonoBehaviour
 
     public void FixedUpdate()
     {
-        if (drawMode == DrawMode.LinearSoundMap)
+        if (drawMode == DrawMode.LinearSoundTex || drawMode == DrawMode.LinearSoundMesh)
             LinearGeneration();
-
     }
 
 
@@ -76,23 +79,44 @@ public class MapGenerator : MonoBehaviour
         }
         texture.SetPixels(colourMap);
         texture.Apply();
-        textureRender.sharedMaterial.mainTexture = texture;
-        textureRender.transform.localScale = new Vector3(mapWidth, 1, mapHeight);
+
+        MapDisplay display = FindObjectOfType<MapDisplay>();
+
+        if (drawMode == DrawMode.LinearSoundTex)
+        {
+            display.DrawTexture(texture);
+        }
+        else if (drawMode == DrawMode.LinearSoundMesh)
+        {
+            //display.DrawTexture(texture);
+            GameObject.Find("MapTex").SetActive(false);
+            mesh = display.DrawMesh(MeshGenerator.GenerateTerrainMesh(mapWidth, mapHeight), texture);
+        }
+
     }
 
     public void FeedSoundMap(int coordX, int lineY, int interval, float mapHeight)
     {
+        MapDisplay display = FindObjectOfType<MapDisplay>();
         Debug.Log(coordX);
         for (int y = lineY - interval; y < lineY + interval; y++)
         {
             if (y >= 0)
             {
-                float currentHeight = mapHeight - Mathf.Abs(lineY - y) * 0.15f;
+                float currentHeight = Mathf.Max(mapHeight - Mathf.Abs(lineY - y) * 0.15f, 0);
                 for (int i = 0; i < regions.Length; i++)
                 {
                     if (currentHeight <= regions[i].height)
                     {
                         colourMap[y * mapWidth + coordX] = regions[i].colour;
+                        if(drawMode == DrawMode.LinearSoundMesh)
+                        {
+                            Vector3[] verts = mesh.vertices;
+                            verts[y * mapWidth + coordX].y = currentHeight * heightMultiplicator;
+                            mesh.vertices = verts;
+                            mesh.RecalculateBounds();
+                            mesh.RecalculateNormals();
+                        }
                         break;
                     }
                 }
