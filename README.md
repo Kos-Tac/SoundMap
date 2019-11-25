@@ -5,5 +5,5 @@ The goal of this project is to create 3D maps using the power of music! Two opti
 ![alt text](https://github.com/Kos-Tac/SoundMap/blob/master/Assets/Misc/Demo.gif)
 
 # Work in progress
-Next working on mesh generation.
-Planning a circular generation for more interesting results.
+Next working on a circular generation for more interesting results,
+then on a DOTS implementation using the soundAnalyser.

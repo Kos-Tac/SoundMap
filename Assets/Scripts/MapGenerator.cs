@@ -50,7 +50,7 @@ public class MapGenerator : MonoBehaviour
             //to avoid getting out of range in case of an Euclidian divide problem
             if (currentStep < mapWidth * mapIntervals)
             {
-                FeedSoundMap(currentStep, currentYLine + mapIntervals / 2, mapHeight / mapIntervals / 2, power);
+                FeedSoundMap(currentStep, currentYLine + mapIntervals / 2, mapHeight / mapIntervals / 2 +1, power);
             }
             currentStep += 1;
             if (currentStep >= soundSteps)
@@ -95,15 +95,21 @@ public class MapGenerator : MonoBehaviour
 
     }
 
-    public void FeedSoundMap(int coordX, int lineY, int interval, float mapHeight)
+    public void FeedSoundMap(int coordX, int lineY, int interval, float height)
     {
         MapDisplay display = FindObjectOfType<MapDisplay>();
-        Debug.Log(coordX);
+       
+        float flatteningCoeff;
         for (int y = lineY - interval; y < lineY + interval; y++)
         {
-            if (y >= 0)
+            if (y >= 0 && y < mapHeight)
             {
-                float currentHeight = Mathf.Max(mapHeight - Mathf.Abs(lineY - y) * 0.15f, 0);
+                if (height >= 0.8)
+                    flatteningCoeff = 0.17f;
+                else
+                    flatteningCoeff = 0.03f;
+
+                float currentHeight = Mathf.Max(height - Mathf.Abs(lineY - y) * flatteningCoeff, 0);
                 for (int i = 0; i < regions.Length; i++)
                 {
                     if (currentHeight <= regions[i].height)
